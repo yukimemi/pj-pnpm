@@ -1,0 +1,33 @@
+## pnpm / TypeScript layer (kata: pj-pnpm)
+
+This block is owned by `yukimemi/pj-pnpm` and re-applied on every
+`kata apply`. Edits go upstream to the template, not to this file.
+
+### Package manager
+
+- **pnpm only.** `pnpm-lock.yaml` is the source of truth.
+  `package-lock.json` / `yarn.lock` must not appear.
+- `packageManager` in `package.json` pins the major.
+- CI uses `pnpm install --frozen-lockfile`. Local dev does not —
+  developers add deps with `pnpm add` / `pnpm add -D`.
+
+### Scripts
+
+- `pnpm dev` — start the dev server.
+- `pnpm build` — `tsc -b && vite build` (or framework equivalent).
+- `pnpm lint` — ESLint on the whole tree.
+- `pnpm test` — Vitest run-once. `pnpm test:watch` for the loop.
+
+### TypeScript
+
+- Project-references layout: root `tsconfig.json` references
+  `tsconfig.app.json` (browser/runtime code) and
+  `tsconfig.node.json` (Vite config and any node-side scripts).
+- `noEmit: true` everywhere — `tsc -b` is type-check-only; the
+  bundler emits.
+
+### .env / secrets
+
+- Never commit `.env`. `.env.example` is the documented surface.
+- Vite-exposed vars must be prefixed `VITE_` to be readable from
+  browser code; anything without that prefix is server-only.

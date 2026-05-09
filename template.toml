@@ -1,0 +1,60 @@
+name = "pj-pnpm"
+version = "0.1.0"
+
+# pnpm-driven Node language layer. Brings the package.json
+# scaffold, the TypeScript-compiler-references root, the
+# pnpm-flavoured renri on-add hook, and a shared .gitignore block.
+# Compose under `pj-base`, then layer a framework on top
+# (`pj-react-web` for Vite/React, future `pj-next-web` etc.).
+
+# package.json — Tera-rendered so `name:` matches the project's
+# directory name. `when = "once"` because each project edits its
+# own scripts / deps after init; `kata apply` should never clobber
+# the consumer's deps.
+[[file]]
+src = "package.json.tera"
+dst = "package.json"
+how = "overwrite"
+when = "once"
+
+# TypeScript references-root. Static, owned-by-kata so the
+# project-references layout stays uniform across yukimemi/* web
+# projects. Framework layers (pj-react-web) ship the actual
+# tsconfig.app.json / tsconfig.node.json that this file references.
+[[file]]
+src = "tsconfig.json"
+how = "overwrite"
+when = "always"
+
+# .gitignore — pnpm/Node-flavoured patterns inside a marker block
+# so each project can append its own entries outside the block
+# without `kata apply` clobbering them.
+[[file]]
+src = ".gitignore.pnpm"
+dst = ".gitignore"
+how = "merge-section"
+when = "always"
+marker = { begin = "# kata:gitignore:pnpm:begin", end = "# kata:gitignore:pnpm:end" }
+
+# pnpm-layer agent guidance — pnpm scripts surface, lockfile
+# discipline, .env handling. Lives in its own marker block so
+# pj-base / pj-react-web sections coexist in the same AGENTS.md.
+[[file]]
+src = "AGENTS.md.pnpm"
+dst = "AGENTS.md"
+how = "merge-section"
+when = "always"
+marker = { begin = "<!-- kata:agents:pnpm:begin -->", end = "<!-- kata:agents:pnpm:end -->" }
+
+# Replace pj-base's apm-install-only renri hook with the
+# pnpm-flavoured chain (apm install --update + pnpm install +
+# vcs-fetch). `merge-toml` keyed on `hooks.post_create` so the
+# array-of-tables is canonical-from-kata, but consumer comments /
+# unrelated keys (e.g. project-specific `[runtime]` sections)
+# survive.
+[[file]]
+src = "renri.toml.pnpm"
+dst = "renri.toml"
+how = "merge-toml"
+when = "always"
+paths = ["hooks.post_create"]
