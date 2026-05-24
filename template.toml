@@ -18,8 +18,8 @@ how = "overwrite"
 when = "once"
 
 # TypeScript references-root. Static, owned-by-kata so the
-# project-references layout stays uniform across yukimemi/* web
-# projects. Framework layers (pj-react-web) ship the actual
+# project-references layout stays uniform across web projects
+# using these templates. Framework layers (pj-react-web) ship the actual
 # tsconfig.app.json / tsconfig.node.json that this file references.
 [[file]]
 src = "tsconfig.json"
