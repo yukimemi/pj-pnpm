@@ -58,3 +58,22 @@ dst = "renri.toml"
 how = "merge-toml"
 when = "always"
 paths = ["hooks.post_create"]
+
+# Renovate: repoint the consumer's `extends` at THIS layer's own
+# preset (`default.json`), which extends the layer below it and adds
+# whatever rules this layer owns.
+#
+# Every layer ships this same entry naming ITSELF; kata's compose rule
+# (last layer wins on file conflicts) then resolves `extends` to the
+# topmost APPLIED layer automatically. No layer needs to know what
+# sits above it, and no preset var is involved.
+#
+# `how = "merge-json"` with `paths = ["extends"]` rewrites ONLY the
+# `extends` array, leaving any consumer-added keys (labels, extra
+# packageRules, …) untouched — unlike a blanket overwrite. The same
+# `renovate.json` doubles as this repo's OWN Renovate config.
+[[file]]
+src = "renovate.json"
+how = "merge-json"
+when = "always"
+paths = ["extends"]
