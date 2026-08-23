@@ -1,0 +1,44 @@
+# pnpm-layer action version pins. Merged into the consumer's
+# `.kata/vars.toml` via `[[file]] how = "merge-toml"`, composing with
+# pj-base's universal pins (actions/checkout,
+# peter-evans/create-pull-request, anthropics/claude-code-action) — this
+# fragment adds only the two actions this layer's `ci.yml.tera` uses.
+#
+# Each `# renovate:` annotation tells Renovate which datasource and
+# upstream repo the value tracks; Renovate bumps these via the
+# customManager declared in pj-base's `default.json`, which scans
+# `vars.<layer>.toml`. This file is where those bumps land.
+#
+# Bare majors rather than exact tags: both actions publish a moving
+# major tag, so `v6` keeps picking up patch releases without a PR, and
+# the github-tags datasource still opens one when a new major appears.
+# Same convention as pj-base's own pins.
+#
+# Seeded `when = "once"`, so a project initialised before this layer
+# shipped a CI workflow never receives these keys — kata's once-gate
+# only looks at whether `.kata/vars.toml` is already recorded in
+# `applied.toml`. That is harmless rather than fatal: kata auto-loads
+# this template-side file as the lowest-precedence var source and
+# deep-merges tables across precedence layers (kata#53, kata#100), so
+# `ci.yml.tera` renders with the values below while the consumer's own
+# file keeps owning `checkout`.
+#
+# Two things to know before bumping a pin here, both observed on a real
+# `kata init` of this layer:
+#
+#   `merge-toml` copies TOML values, not the comments above them, so a
+#   seeded consumer's `.kata/vars.toml` gets `pnpm_action_setup = "v6"`
+#   with no `# renovate:` line — the customManager cannot see these two
+#   keys there. Consumer-side bumps therefore do not happen; this file
+#   is the only place they do.
+#
+#   A consumer's `.kata/vars.toml` outranks this seed, so once a project
+#   has been seeded a bump here no longer reaches it. Propagating to an
+#   already-seeded project takes `kata apply --reseed .kata/vars.toml`,
+#   which re-runs the merge over their file.
+
+[actions]
+# renovate: datasource=github-tags depName=pnpm/action-setup
+pnpm_action_setup = "v6"
+# renovate: datasource=github-tags depName=actions/setup-node
+setup_node = "v7"

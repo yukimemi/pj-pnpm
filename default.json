@@ -1,4 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>yukimemi/pj-base"]
+  "extends": ["github>yukimemi/pj-base"],
+  "packageRules": [
+    {
+      "description": "Consumer-side `ci.yml`, rendered by THIS layer from `ci.yml.tera` with `how = \"overwrite\", when = \"always\"`. Action bumps happen upstream in pj-pnpm and flow down via `kata apply`, so a Renovate-driven local bump is reverted on the next apply and re-opened forever. The canonical pins live in `.kata/vars.toml`, seeded from this layer's `vars.pnpm.toml` — which is where the `# renovate:` annotations that make them bumpable live. Owned here rather than in pj-base because pj-base cannot know that a pnpm layer composes above it, and because `ci.yml` is a name any project may legitimately hand-write.",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [".github/workflows/ci.yml"],
+      "enabled": false
+    }
+  ]
 }
