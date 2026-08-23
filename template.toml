@@ -1,5 +1,5 @@
 name = "pj-pnpm"
-version = "0.2.0"
+version = "0.3.0"
 
 # pnpm-driven Node language layer. Brings the package.json
 # scaffold, the TypeScript-compiler-references root, the CI
