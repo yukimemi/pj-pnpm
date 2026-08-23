@@ -1,9 +1,10 @@
 name = "pj-pnpm"
-version = "0.1.0"
+version = "0.2.0"
 
 # pnpm-driven Node language layer. Brings the package.json
-# scaffold, the TypeScript-compiler-references root, the
-# pnpm-flavoured renri on-add hook, and a shared .gitignore block.
+# scaffold, the TypeScript-compiler-references root, the CI
+# workflow that runs the package.json scripts, the pnpm-flavoured
+# renri on-add hook, and a shared .gitignore block.
 # Compose under `pj-base`, then layer a framework on top
 # (`pj-react-web` for Vite/React, future `pj-next-web` etc.).
 
@@ -35,6 +36,49 @@ dst = ".gitignore"
 how = "merge-section"
 when = "always"
 marker = { begin = "# kata:gitignore:pnpm:begin", end = "# kata:gitignore:pnpm:end" }
+
+# pnpm-layer action pins, merged into `.kata/vars.toml` on top of
+# pj-base's universal seed. `merge-toml` with an explicit `paths`
+# list writes only these two keys, leaving pj-base's
+# `actions.checkout` / `actions.create_pull_request` /
+# `actions.claude_code_action` pins untouched.
+#
+# `when = "once"`: `.kata/vars.toml` is the consumer's file, so kata
+# writes these two keys on the first apply and then leaves it alone,
+# and a project that hand-edits a pin keeps the edit. The costs are
+# real though — a project initialised before this entry existed never
+# gets the keys written at all, and a bump made upstream stops
+# reaching any project that already has them. `vars.pnpm.toml`
+# documents both, why `ci.yml.tera` still renders in the first case,
+# and the `--reseed` escape hatch for the second.
+[[file]]
+src = "vars.pnpm.toml"
+dst = ".kata/vars.toml"
+how = "merge-toml"
+when = "once"
+paths = ["actions.pnpm_action_setup", "actions.setup_node"]
+
+# CI workflow. This layer owns `package.json` and its `lint` /
+# `build` / `test` scripts, so it is the layer that has to ship the
+# workflow that runs them — the AGENTS block below has asserted "CI
+# uses `pnpm install --frozen-lockfile`" since the layer was written,
+# while no consumer of it had any CI at all.
+#
+# Same `.tera` suffix story as pj-rust's `ci.yml.tera`: (1) GitHub
+# Actions only runs `.yml` / `.yaml` under `.github/workflows/`, so
+# the suffixed source stays inert inside this template repo — it must
+# not try to `pnpm install` a `package.json` that is a Tera template
+# here; (2) kata Tera-renders `.tera` files at apply time and strips
+# the suffix on the way out, so the consumer ends up with `ci.yml`.
+#
+# `when = "always"`: the workflow is kata-owned, and the job name is
+# the status check consumers require for merge — it has to stay
+# uniform. Project-specific CI goes in a separate workflow file.
+[[file]]
+src = ".github/workflows/ci.yml.tera"
+dst = ".github/workflows/ci.yml"
+how = "overwrite"
+when = "always"
 
 # pnpm-layer agent guidance — pnpm scripts surface, lockfile
 # discipline, .env handling. Lives in its own marker block so
