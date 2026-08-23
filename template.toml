@@ -48,16 +48,31 @@ marker = { begin = "<!-- kata:agents:pnpm:begin -->", end = "<!-- kata:agents:pn
 
 # Replace pj-base's apm-install-only renri hook with the
 # pnpm-flavoured chain (apm install --update + pnpm install +
-# vcs-fetch). `merge-toml` keyed on `hooks.post_create` so the
-# array-of-tables is canonical-from-kata, but consumer comments /
-# unrelated keys (e.g. project-specific `[runtime]` sections)
-# survive.
+# vcs-fetch). Consumer comments / unrelated keys (e.g. a
+# project-specific `[layout]` section) survive either way, but the
+# three hooks are keyed by index rather than as one array so a
+# project can append its own `[[hooks.post_create]]` — copying a
+# git-ignored `.env` into the fresh worktree, say — and keep it
+# across `kata apply`. Two consequences worth knowing:
+#
+#   The index is the position in the file, not a name. Consumer
+#   entries have to sit *after* these three, or the template will
+#   overwrite them.
+#
+#   Growing pj-base's single hook to three relies on kata treating
+#   an index one past the end as an append. On a kata without that
+#   rule the second and third paths are silent no-ops, and a fresh
+#   project ends up with `apm install` alone.
 [[file]]
 src = "renri.toml.pnpm"
 dst = "renri.toml"
 how = "merge-toml"
 when = "always"
-paths = ["hooks.post_create"]
+paths = [
+  "hooks.post_create[0]",
+  "hooks.post_create[1]",
+  "hooks.post_create[2]",
+]
 
 # Renovate: repoint the consumer's `extends` at THIS layer's own
 # preset (`default.json`), which extends the layer below it and adds
