@@ -41,4 +41,4 @@
 # renovate: datasource=github-tags depName=pnpm/action-setup
 pnpm_action_setup = "v6.1.0"
 # renovate: datasource=github-tags depName=actions/setup-node
-setup_node = "v7"
+setup_node = "v7.1.0"
